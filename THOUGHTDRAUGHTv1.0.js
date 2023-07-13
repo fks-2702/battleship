@@ -1,13 +1,16 @@
+
+
 class BattleShip extends PlayerAI {
     constructor(name){
         super(name);
         this.name = '#ff0000#9D702E';
+        this.lastTree = null;
+        this.publicDepth = 4
     }
 
     makeMove( gamestate, moves ){
 
         if( gamestate.isGameOver() ) { return [] };
-        let publicDepth = 4
 
         class AlphaBetaNode {
             constructor (gamestate, alpha, beta, isMax) {
@@ -44,8 +47,33 @@ class BattleShip extends PlayerAI {
                         node.beta = rtn
                     }
 
-                    if (depth === publicDepth) {
+                    if (depth != 0) {
                         node.children.push(child)
+                    }
+                }
+
+                if (node.isMax) {
+                    return node.alpha
+                }
+                else {
+                    return node.beta
+                }
+            }
+
+            alphaBetaSearch(node, depth) {
+                if (depth === 0) {
+                    return this.heuristic();
+                }
+                for (let child of node.children) {
+                    if (node.alpha >= node.beta) {
+                        break
+                    }
+                    let rtn = this.alphaBeta(child, depth - 1)
+                    if (node.isMax && rtn > node.alpha) {
+                        node.alpha = rtn
+                    }
+                    else if (!node.isMax && rtn < node.beta) {
+                        node.beta = rtn
                     }
                 }
 
@@ -87,24 +115,61 @@ class BattleShip extends PlayerAI {
 
                 score = parseInt(score, 10)
             }
-        }
 
-        let root = new AlphaBetaNode(gamestate.deepCopy(), Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, true);
-        let max = root.alphaBeta(root, publicDepth)
-        let pick = null
-        for (i in root.children) {
-            if (i.beta = max) {
-                pick = root.children.indexOf(i)
-                break
+            findLeaves() {
+                let list = []
+
+                let helper = function (node) {
+                    if (node.children == []) {
+                        list.push(node)
+                        return
+                    }
+                    for (let child of node.children) {
+                        helper(child)
+                    }
+                    return
+                }
+
+                helper(this)
+                return list
             }
         }
+        if (this.lastTree == null) {
+            let root = new AlphaBetaNode(gamestate.deepCopy(), Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, true);
+            let max = root.alphaBeta(root, 4)
+            let pick = null
+            for (i in root.children) {
+                if (i.beta = max) {
+                    pick = root.children.indexOf(i)
+                    break
+                }
+            }
 
-        let validMoves = node.gamestate.getValidMoves();
+            let validMoves = node.gamestate.getValidMoves();
 
-        for( let move of validMoves[pick] ) {
-            moves.push( move )
+            for( let move of validMoves[pick] ) {
+                moves.push( move );
+            }
+            this.lastTree = root;
+            return validMoves[pick];
         }
-        
-        return validMoves[pick];
+        else {
+            let root = this.lastTree
+            for (let child of root.children) {
+                if (child.gamestate == gamestate) {
+                    // Now to activate my special move
+                    root = child
+                    break;
+                }
+            }
+            // Root is now the child, which is the current game state.
+            // Now it's time to run a transversal of the tree and run alphabeta on all of the leaves
+            let leaves = root.findLeaves()
+            for (let leaf of leaves) {
+                leaf.alphaBeta(leaf, 4)
+            }
+            this.publicDepth += 4
+            let max = root.alphaBetaSearch(root, this.publicDepth)
+        }
     }
 }
