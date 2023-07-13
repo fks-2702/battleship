@@ -1,4 +1,4 @@
-class ThoughtDraught extends PlayerAI {
+class BattleShip extends PlayerAI {
     constructor(name){
         super(name);
         this.name = '#ff0000#9D702E';
