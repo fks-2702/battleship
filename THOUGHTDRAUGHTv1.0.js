@@ -1,4 +1,4 @@
-class ThoughtDraught extends PlayerAI {
+class BattleShip extends PlayerAI {
     constructor(name){
         super(name);
         this.name = '#ff0000#9D702E';
@@ -15,7 +15,7 @@ class ThoughtDraught extends PlayerAI {
                 this.alpha = alpha
                 this.beta = beta
                 this.isMax = isMax
-                this.child = []
+                this.children = []
             }
 
 
@@ -45,7 +45,7 @@ class ThoughtDraught extends PlayerAI {
                     }
 
                     if (depth === publicDepth) {
-                        node.child.push(child)
+                        node.children.push(child)
                     }
                 }
 
@@ -92,9 +92,9 @@ class ThoughtDraught extends PlayerAI {
         let root = new AlphaBetaNode(gamestate.deepCopy(), Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, true);
         let max = root.alphaBeta(root, publicDepth)
         let pick = null
-        for (i in root.child) {
+        for (i in root.children) {
             if (i.beta = max) {
-                pick = root.child.indexOf(i)
+                pick = root.children.indexOf(i)
                 break
             }
         }
