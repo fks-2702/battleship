@@ -7,7 +7,6 @@ class ThoughtDraught extends PlayerAI {
     makeMove( gamestate, moves ){
 
         if( gamestate.isGameOver() ) { return [] };
-        let publicDepth = 4
 
         class AlphaBetaNode {
             constructor (gamestate, alpha, beta, isMax) {
@@ -82,10 +81,6 @@ class ThoughtDraught extends PlayerAI {
                     else if (!this.isMax && rtn < this.beta) {
                         this.beta = rtn
                     }
-
-                    if (depth === publicDepth) {
-                        this.child.push(child)
-                    }
                 }
 
                 if (this.isMax) {
@@ -99,15 +94,16 @@ class ThoughtDraught extends PlayerAI {
             heuristic () {
                 let score = 0
                 if (this.gamestate.whoseTurn() == 1) {
-                    score = (this.gamestate.getscore(1) - this.gamestate.getscore(2)).toString()
+                    score = (this.gamestate.getScore(1) - this.gamestate.getScore(2)).toString()
                 }
                 else {
-                    score = (this.gamestate.getscore(2) - this.gamestate.getscore(1)).toString()
+                    score = (this.gamestate.getScore(2) - this.gamestate.getScore(1)).toString()
                 }
                 let positionValue = 0
 
                 let piecesLeft = 0
-                for (let i of this.gamestate.getPlayableLocations()) {
+                let playableLocations = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"]
+                for (let i of playableLocations) {
                     if (this.gamestate.getOwner(i) != null) {
                         piecesLeft++
                     }
@@ -128,22 +124,27 @@ class ThoughtDraught extends PlayerAI {
             }
         }
 
-        let root = new AlphaBetaNode(gamestate.deepCopy(), Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, true);
-        let max = root.alphaBeta(root, publicDepth)
-        let pick = null
-        for (i in root.child) {
-            if (i.beta = max) {
-                pick = root.child.indexOf(i)
-                break
+        let alpha = Number.NEGATIVE_INFINITY
+        let beta = Number.POSITIVE_INFINITY
+        let publicDepth = 4
+
+        let validMoves = gamestate.getValidMoves();
+
+        for( let vm of validMoves) {
+            let newState = gamestate.deepCopy
+            newState.makeMove(vm)
+
+            let child = new AlphaBetaNode(newState, alpha, beta, true);
+            let rtn = child.alphaBeta(publicDepth)
+
+            if (rtn > alpha) {
+                alpha = rtn
+                moves.length = 0
+
+                for (let m of vm) {
+                    moves.push(m)
+                }
             }
         }
-
-        let validMoves = node.gamestate.getValidMoves();
-
-        for( let move of validMoves[pick] ) {
-            moves.push( move )
-        }
-        
-        return validMoves[pick];
     }
 }
