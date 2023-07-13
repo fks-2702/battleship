@@ -166,9 +166,9 @@ class BattleShip extends PlayerAI {
             // Now it's time to run a transversal of the tree and run alphabeta on all of the leaves
             let leaves = root.findLeaves()
             for (let leaf of leaves) {
-                leaf.alphaBeta(leaf, 4)
+                leaf.alphaBeta(leaf, 1)
             }
-            this.publicDepth += 4
+            this.publicDepth += 1
             let max = root.alphaBetaSearch(root, this.publicDepth)
             let pick = null
             for (i in root.children) {
