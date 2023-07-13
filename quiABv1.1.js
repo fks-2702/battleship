@@ -24,7 +24,7 @@ class ThoughtDraught extends PlayerAI {
                 let currentSigs = this.heuristic()
 
                 if (depth === 0) {
-                    return this.heuristic
+                    return this.heuristic()
                 }
                 else if (node.isMax && currentSigs * 4 / 3 > lastMax) {
                     return this.heuristic()
@@ -42,11 +42,11 @@ class ThoughtDraught extends PlayerAI {
                     let child = new AlphaBetaNode(newGamestate, node.alpha, node.beta, !node.isMax);
 
                     if (node.isMax) {
-                        lastMax = this.heuristic
+                        lastMax = this.heuristic()
                         this.quiAB(child, depth - 1, lastMax, beta) 
                     }
                     else {
-                        lastMin= this.heuristic
+                        lastMin= this.heuristic()
                         this.quiAB(child, depth - 1, alpha, lastMin)
                     }
                 }
@@ -54,61 +54,67 @@ class ThoughtDraught extends PlayerAI {
 
             alphaBeta (node, depth) {
                 if (depth === 0) {
+                    //if ((node.isMax && this.heuristic * 4 / 3 > lastMax) || (node.isMin && this.heuristic * 3 / 4 > lastMin)) {
                     return this.heuristic();
+                    //}
+                    //else {
+                    //    return this.quiAB(node, publicDepth, this.alpha, this.beta)
+                    //}
                 }
 
-                let validMoves = node.gamestate.getValidMoves();
+                let validMoves = this.gamestate.getValidMoves();
 
+                //ab pruning
                 for (let i of validMoves) {
-                    if (node.alpha >= node.beta) {
+                    if (this.alpha >= this.beta) {
                         break
                     }
 
-                    let newGamestate = gamestate.deepCopy();
+                    let newGamestate = this.gamestate.deepCopy();
                     newGamestate.makeMove(i);
                     
-                    let child = new AlphaBetaNode(newGamestate, node.alpha, node.beta, !node.isMax);
+                    let child = new AlphaBetaNode(newGamestate, this.alpha, this.beta, !this.isMax);
                     let rtn = child.alphaBeta(child, depth - 1);
 
-                    if (node.isMax && rtn > node.alpha) {
-                        node.alpha = rtn
+                    if (this.isMax && rtn > this.alpha) {
+                        this.alpha = rtn
                     }
-                    else if (!node.isMax && rtn < node.beta) {
-                        node.beta = rtn
+                    else if (!this.isMax && rtn < this.beta) {
+                        this.beta = rtn
                     }
 
                     if (depth === publicDepth) {
-                        node.child.push(child)
+                        this.child.push(child)
                     }
                 }
 
-                if (node.isMax) {
-                    return node.alpha
+                if (this.isMax) {
+                    return this.alpha
                 }
                 else {
-                    return node.beta
+                    return this.beta
                 }
             }
 
             heuristic () {
                 let score = 0
                 if (this.gamestate.whoseTurn() == 1) {
-                    score = (node.gamestate.getscore(1) - node.gamestate.getscore(2)).toString()
+                    score = (this.gamestate.getscore(1) - this.gamestate.getscore(2)).toString()
                 }
                 else {
-                    score = (node.gamestate.getscore(2) - node.gamestate.getscore(1)).toString()
+                    score = (this.gamestate.getscore(2) - this.gamestate.getscore(1)).toString()
                 }
                 let positionValue = 0
 
                 let piecesLeft = 0
                 for (let i of this.gamestate.getPlayableLocations()) {
-                    if (node.gamestate.getOwner(i) != null) {
+                    if (this.gamestate.getOwner(i) != null) {
                         piecesLeft++
                     }
-                    if (node.gamestate.whoseTurn() == 1 && node.gamestate.getOwner(i) == 1 && node.gamestate.getLevel(i) == 0) {
+                    if (this.gamestate.whoseTurn() == 1 && this.gamestate.getOwner(i) == 1 && this.gamestate.getLevel(i) == 0) {
                         positionValue = positionValue + Math.floor(i/2)
                     }
-                    else if (node.gamestate.whoseTurn() == 2 && node.gamestate.getOwner(i) == 2 && node.gamestate.getLevel(i) == 0) {
+                    else if (this.gamestate.whoseTurn() == 2 && this.gamestate.getOwner(i) == 2 && this.gamestate.getLevel(i) == 0) {
                         positionValue = positionValue + Math.floor(Math.abs(i-33)/2)
                     }
                 }
