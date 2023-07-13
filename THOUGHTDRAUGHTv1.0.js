@@ -170,6 +170,21 @@ class BattleShip extends PlayerAI {
             }
             this.publicDepth += 4
             let max = root.alphaBetaSearch(root, this.publicDepth)
+            let pick = null
+            for (i in root.children) {
+                if (i.beta = max) {
+                    pick = root.children.indexOf(i)
+                    break
+                }
+            }
+
+            let validMoves = node.gamestate.getValidMoves();
+
+            for( let move of validMoves[pick] ) {
+                moves.push( move );
+            }
+            this.lastTree = root;
+            return validMoves[pick];
         }
     }
 }
