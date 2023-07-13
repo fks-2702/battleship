@@ -100,11 +100,15 @@ class ThoughtDraught extends PlayerAI {
                     score = (this.gamestate.getScore(2) - this.gamestate.getScore(1)).toString()
                 }
                 let positionValue = 0
+                let positionValueKings = 0
 
                 let piecesLeft = 0
                 let playableLocations = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"]
                 for (let i of playableLocations) {
-                    if (this.gamestate.getOwner(i) != null) {
+                    if (this.gamestate.whoseTurn() == 1  && this.gamestate.getOwner(i) == 1) {
+                        piecesLeft++
+                    }
+                    else if (this.gamestate.whoseTurn() == 2  && this.gamestate.getOwner(i) == 2) {
                         piecesLeft++
                     }
                     if (this.gamestate.whoseTurn() == 1 && this.gamestate.getOwner(i) == 1 && this.gamestate.getLevel(i) == 0) {
@@ -113,29 +117,37 @@ class ThoughtDraught extends PlayerAI {
                     else if (this.gamestate.whoseTurn() == 2 && this.gamestate.getOwner(i) == 2 && this.gamestate.getLevel(i) == 0) {
                         positionValue = positionValue + Math.floor(Math.abs(i-33)/2)
                     }
+                    if (this.gamestate.whoseTurn() == 1 && this.gamestate.getOwner(i) == 1 && this.gamestate.getLevel(i) != 0) {
+                        positionValueKings = positionValueKings + Math.floor(Math.abs(i-33)/2)
+                    }
+                    else if (this.gamestate.whoseTurn() == 2 && this.gamestate.getOwner(i) == 2 && this.gamestate.getLevel(i) != 0) {
+                        positionValueKings = positionValueKings + Math.floor(i/2)
+                    }
                 }
 
-                score = score + (6 * positionValue).toString()
-                score = score + ((100) - 3 * piecesLeft).toString()
-                score = score + (this.gamestate.getValidMoves().length).toString()
+                score = score + (3 * piecesLeft).toString()
+                score = score + (4 * positionValue).toString()
+                //score = score + (2 * this.gamestate.getValidMoves().length).toString()
+                score = score + (6 * positionValueKings).toString()
                 score = score + (Math.floor(Math.random() * 2)).toString()
 
                 score = parseInt(score, 10)
+                console.log(score)
             }
         }
 
         let alpha = Number.NEGATIVE_INFINITY
         let beta = Number.POSITIVE_INFINITY
-        let publicDepth = 4
+        let publicDepth = 8
 
         let validMoves = gamestate.getValidMoves();
 
         for( let vm of validMoves) {
-            let newState = gamestate.deepCopy
+            let newState = gamestate.deepCopy()
             newState.makeMove(vm)
 
             let child = new AlphaBetaNode(newState, alpha, beta, true);
-            let rtn = child.alphaBeta(publicDepth)
+            let rtn = child.alphaBeta(child, publicDepth)
 
             if (rtn > alpha) {
                 alpha = rtn
